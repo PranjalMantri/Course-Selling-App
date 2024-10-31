@@ -1,13 +1,17 @@
 import { Router } from "express";
-import { UserSchema } from "../validation/user.validation.js";
+import {
+  UserSignInSchema,
+  UserSignUpSchema,
+} from "../validation/user.validation.js";
 import { User } from "../models/user.schema.js";
+import jwt from "jsonwebtoken";
 
 const userRouter = Router();
 
 userRouter.post("/signup", async (req, res) => {
   const { fullName, email, password } = req.body;
 
-  const parsedUser = UserSchema.safeParse({ fullName, email, password });
+  const parsedUser = UserSignInSchema.safeParse({ fullName, email, password });
 
   if (!parsedUser.success) {
     return res.status(400).json({
@@ -15,6 +19,15 @@ userRouter.post("/signup", async (req, res) => {
       message: `Invalid credentails: ${parsedUser.error.errors.map(
         (error) => error.message
       )}`,
+    });
+  }
+
+  const existingUser = await User.findOne({ email });
+
+  if (existingUser) {
+    return res.status(400).json({
+      success: false,
+      message: "User with that email already exists",
     });
   }
 
@@ -34,7 +47,45 @@ userRouter.post("/signup", async (req, res) => {
   });
 });
 
-userRouter.post("/signin", (req, res) => {});
+userRouter.post("/signin", async (req, res) => {
+  const { email, password } = req.body;
+
+  const parsedUser = UserSignInSchema.safeParse({ email, password });
+
+  if (!parsedUser.success) {
+    return res.status(400).json({
+      success: false,
+      message: `Invalid credentials: ${parsedUser.error.errors.map(
+        (error) => error.message
+      )}`,
+    });
+  }
+
+  const existingUser = await User.findOne({ email }).select("-password");
+
+  if (!existingUser) {
+    return res.status(400).json({
+      success: false,
+      message: "User does not exist",
+    });
+  }
+
+  const token = jwt.sign(
+    { userId: existingUser._id },
+    process.env.USER_JWT_SECRET
+  );
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res.status(200).cookie("token", token, cookieOptions).json({
+    success: true,
+    message: "Successfully signed in the user",
+    data: existingUser,
+  });
+});
 
 userRouter.get("/purchase", (req, res) => {});
 
