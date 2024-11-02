@@ -21,7 +21,6 @@ app.use(express.json());
 import { userRouter } from "./routes/user.router.js";
 import { courseRouter } from "./routes/course.router.js";
 import { adminRouter } from "./routes/admin.router.js";
-import errorMap from "zod/locales/en.js";
 
 app.use("/user", userRouter);
 app.use("/course", courseRouter);
