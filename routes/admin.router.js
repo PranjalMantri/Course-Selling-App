@@ -143,8 +143,49 @@ adminRouter.get("/courses", verifyAdmin, async (req, res) => {
   });
 });
 
-adminRouter.delete("/course/:id", (req, res) => {});
+adminRouter.delete("/course/:id", verifyAdmin, async (req, res) => {
+  const id = req.params.id;
+  const courseId = new mongoose.Types.ObjectId(id);
 
-adminRouter.put("/course/:id", (req, res) => {});
+  const course = await Course.findOneAndDelete(courseId);
+
+  return res.status(200).json({
+    success: true,
+    message: "Successfuly deleted the course",
+  });
+});
+
+adminRouter.put("/course/:id", verifyAdmin, async (req, res) => {
+  const id = req.params.id;
+  const courseId = new mongoose.Types.ObjectId(id);
+
+  const { title, description, imageUrl, price } = req.body;
+
+  const existingCourse = await Course.find({ _id: courseId });
+
+  if (!existingCourse) {
+    return res.status(400).json({
+      success: false,
+      message: "Course does not exist",
+    });
+  }
+
+  const course = await Course.findOneAndUpdate(
+    courseId,
+    {
+      title: title || existingCourse.title,
+      description: description || existingCourse.description,
+      imageUrl: imageUrl || existingCourse.imageUrl,
+      price: price || existingCourse.price,
+    },
+    { new: true }
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Successfuly updated course details",
+    data: course,
+  });
+});
 
 export { adminRouter };
