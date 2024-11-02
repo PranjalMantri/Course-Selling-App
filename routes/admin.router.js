@@ -1,10 +1,13 @@
 import { Router } from "express";
 import { Admin } from "../models/admin.schema.js";
+import { Course } from "../models/course.schema.js";
 import {
   UserSignInSchema,
   UserSignUpSchema,
 } from "../validation/user.validation.js";
 import jwt from "jsonwebtoken";
+import verifyAdmin from "../middlewares/admin.js";
+import mongoose from "mongoose";
 
 const adminRouter = Router();
 
@@ -71,9 +74,11 @@ adminRouter.post("/signin", async (req, res) => {
   }
 
   const token = jwt.sign(
-    { userId: existingAdmin._id },
+    { adminId: existingAdmin._id },
     process.env.ADMIN_JWT_SECRET
   );
+
+  console.log(token);
 
   const cookieOptions = {
     httpOnly: true,
@@ -84,6 +89,33 @@ adminRouter.post("/signin", async (req, res) => {
     success: true,
     message: "Successfully signed in the admin",
     data: existingAdmin,
+  });
+});
+
+adminRouter.post("/course", verifyAdmin, async (req, res) => {
+  const adminId = req.adminId;
+  const { title, description, imageUrl, price } = req.body;
+
+  const course = await Course.create({
+    title,
+    description,
+    imageUrl,
+    price,
+    creatorId: new mongoose.Types.ObjectId(adminId),
+  });
+
+  if (!course) {
+    return res.status(400).json({
+      success: true,
+      message: "Something went wrong while creating the course",
+      data: course,
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Successfuly created the course",
+    data: course,
   });
 });
 

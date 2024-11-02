@@ -19,9 +19,6 @@ const courseSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-  duration: {
-    type: String,
-  },
   creatorId: {
     type: ObjectId,
     ref: "Admin",

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Purchase } from "../models/purchases.schema.js";
 import { Course } from "../models/course.schema.js";
 import verifyUser from "../middlewares/auth.js";
+import mongoose from "mongoose";
 
 const courseRouter = Router();
 
@@ -24,9 +25,14 @@ courseRouter.get("/preview", async (req, res) => {
 
 courseRouter.post("/purchase", verifyUser, async (req, res) => {
   const userId = req.userId;
+  console.log(userId);
+
   const { courseId } = req.body;
 
-  const purchase = await Purchase.create({ userId, courseId });
+  const purchase = await Purchase.create({
+    courseId: new mongoose.Types.ObjectId(courseId),
+    userId: new mongoose.Types.ObjectId(userId),
+  });
 
   if (!purchase) {
     return res.status(400).json({
@@ -41,5 +47,7 @@ courseRouter.post("/purchase", verifyUser, async (req, res) => {
     data: purchase,
   });
 });
+
+courseRouter.delete("/", (req, res) => {});
 
 export { courseRouter };

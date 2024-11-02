@@ -5,7 +5,7 @@ function verifyUser(req, res, next) {
   const decodedToken = jwt.verify(token, process.env.USER_JWT_SECRET);
 
   if (decodedToken) {
-    req.userId = decodedToken.id;
+    req.userId = decodedToken.userId;
     next();
   } else {
     return res.status(403).json({

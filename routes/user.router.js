@@ -7,6 +7,7 @@ import { User } from "../models/user.schema.js";
 import { Purchase } from "../models/purchases.schema.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import verifyUser from "../middlewares/auth.js";
 
 const userRouter = Router();
 
@@ -77,6 +78,8 @@ userRouter.post("/signin", async (req, res) => {
     process.env.USER_JWT_SECRET
   );
 
+  console.log(token);
+
   const cookieOptions = {
     httpOnly: true,
     secure: true,
@@ -89,11 +92,11 @@ userRouter.post("/signin", async (req, res) => {
   });
 });
 
-userRouter.get("/purchase", async (req, res) => {
+userRouter.get("/purchase", verifyUser, async (req, res) => {
   const userId = req.userId;
 
   const purchases = await Purchase.find({
-    _id: new mongoose.Types.ObjectId(userId),
+    userId: new mongoose.Types.ObjectId(userId),
   });
 
   return res.status(200).json({
