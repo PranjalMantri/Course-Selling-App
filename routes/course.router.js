@@ -25,7 +25,6 @@ courseRouter.get("/preview", async (req, res) => {
 
 courseRouter.post("/purchase", verifyUser, async (req, res) => {
   const userId = req.userId;
-  console.log(userId);
 
   const { courseId } = req.body;
 
