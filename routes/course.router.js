@@ -47,6 +47,4 @@ courseRouter.post("/purchase", verifyUser, async (req, res) => {
   });
 });
 
-courseRouter.delete("/", (req, res) => {});
-
 export { courseRouter };

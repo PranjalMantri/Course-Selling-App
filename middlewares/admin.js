@@ -5,7 +5,7 @@ function verifyAdmin(req, res, next) {
   const decodedToken = jwt.verify(token, process.env.ADMIN_JWT_SECRET);
 
   if (decodedToken) {
-    req.userId = decodedToken.id;
+    req.adminId = decodedToken.adminId;
     next();
   } else {
     return res.status(403).json({

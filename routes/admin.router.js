@@ -94,6 +94,8 @@ adminRouter.post("/signin", async (req, res) => {
 
 adminRouter.post("/course", verifyAdmin, async (req, res) => {
   const adminId = req.adminId;
+  console.log("admin id is :", adminId);
+
   const { title, description, imageUrl, price } = req.body;
 
   const course = await Course.create({
@@ -119,10 +121,30 @@ adminRouter.post("/course", verifyAdmin, async (req, res) => {
   });
 });
 
-adminRouter.get("/courses", (req, res) => {});
+adminRouter.get("/courses", verifyAdmin, async (req, res) => {
+  const adminId = req.adminId;
 
-adminRouter.delete("/course", (req, res) => {});
+  const courses = await Course.find({
+    creatorId: new mongoose.Types.ObjectId(adminId),
+  });
 
-adminRouter.put("/course", (req, res) => {});
+  if (!courses || courses.length == 0) {
+    return res.status(200).json({
+      success: true,
+      message: "There are no courses created by the course creator",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message:
+      "Successfuly fetched all of the courses created by the course creator",
+    data: courses,
+  });
+});
+
+adminRouter.delete("/course/:id", (req, res) => {});
+
+adminRouter.put("/course/:id", (req, res) => {});
 
 export { adminRouter };
