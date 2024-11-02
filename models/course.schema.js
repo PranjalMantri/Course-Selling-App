@@ -23,7 +23,7 @@ const courseSchema = mongoose.Schema({
     type: String,
   },
   creatorId: {
-    type: isObjectIdOrHexString,
+    type: ObjectId,
     ref: "Admin",
   },
 });

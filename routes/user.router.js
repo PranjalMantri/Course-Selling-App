@@ -4,7 +4,9 @@ import {
   UserSignUpSchema,
 } from "../validation/user.validation.js";
 import { User } from "../models/user.schema.js";
+import { Purchase } from "../models/purchases.schema.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const userRouter = Router();
 
@@ -87,6 +89,18 @@ userRouter.post("/signin", async (req, res) => {
   });
 });
 
-userRouter.get("/purchase", (req, res) => {});
+userRouter.get("/purchase", async (req, res) => {
+  const userId = req.userId;
+
+  const purchases = await Purchase.find({
+    _id: new mongoose.Types.ObjectId(userId),
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Successfuly fetched user's all purchases",
+    data: purchases,
+  });
+});
 
 export { userRouter };
